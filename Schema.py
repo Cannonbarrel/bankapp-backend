@@ -5,18 +5,18 @@ from bson import ObjectId
 class ItemCreate(BaseModel):
     name: str
     description: Optional[str] = None
-    price: float
+    Swaglevel: float
 
 class ItemUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    price: Optional[float] = None
+    Swaglevel: Optional[float] = None
 
 class ItemResponse(BaseModel):
     id: str = Field(alias="_id")
     name: str
     description: Optional[str] = None
-    price: float
+    Swaglevel: float
 
     class Config:
         populate_by_name = True

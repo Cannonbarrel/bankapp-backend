@@ -8,8 +8,6 @@ from Schema import ItemCreate, ItemUpdate, ItemResponse
 app = Flask(__name__)
 init_db(app)
 
-# Initialize architectural layers with Flask-PyMongo's extension instance
-# Note: Ensure this is executed AFTER init_db(app) has mounted the db object!
 item_repository = ItemRepository(mongo.db)
 item_service = ItemService(item_repository)
 
@@ -26,7 +24,6 @@ def create_item():
     return jsonify(ItemResponse(**new_item).model_dump(by_alias=True)), 201
 
 
-# 2. GET
 @app.route('/items', methods=['GET'])
 def get_all_items():
     items = item_service.list_items()
@@ -43,7 +40,6 @@ def get_single_item(item_id):
         return jsonify({"error": str(e)}), 404
 
 
-# 3. PUT
 @app.route('/items/<string:item_id>', methods=['PUT'])
 def update_item(item_id):
     try:
@@ -58,7 +54,6 @@ def update_item(item_id):
         return jsonify({"error": str(e)}), 400
 
 
-# 4. DELETE
 @app.route('/items/<string:item_id>', methods=['DELETE'])
 def delete_item(item_id):
     try:
@@ -67,8 +62,6 @@ def delete_item(item_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 404
 
-
-# 5. HEAD
 @app.route('/items', methods=['HEAD'])
 def read_items_head():
     items = item_service.list_items()
@@ -76,16 +69,12 @@ def read_items_head():
     res.headers["X-Total-Count"] = str(len(items))
     return res
 
-
-# 6. OPTIONS
 @app.route('/items', methods=['OPTIONS'])
 def options_items():
     res = Response()
     res.headers["Allow"] = "GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE"
     return res
 
-
-# 7. TRACE
 @app.route('/items', methods=['TRACE'])
 def trace_items():
     headers_str = "\n".join(f"{k}: {v}" for k, v in request.headers.items())
