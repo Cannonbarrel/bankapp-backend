@@ -1,34 +1,45 @@
-from typing import List
+# Service.py
+from typing import List, Dict, Any
 from werkzeug.exceptions import BadRequest, NotFound
-from Repo import ItemRepository
-from Schema import ItemCreate, ItemUpdate
+from Repo import AccountRepository
+from Schema import AccountCreate, TransactionRequest
 
 
-class ItemService:
-    def __init__(self, repository: ItemRepository):
+class AccountService:
+    def __init__(self, repository: AccountRepository):
         self.repository = repository
 
-    def add_item(self, item_data: ItemCreate) -> dict:
-        return self.repository.create(item_data.model_dump())
+    def create_account(self, data: AccountCreate) -> Dict[str, Any]:
+        return self.repository.create(data.userName, data.initial_balance)
 
-    def get_item(self, item_id: str) -> dict:
-        item = self.repository.get_by_id(item_id)
-        if not item:
-            raise NotFound("Item not found")
-        return item
+    def get_account(self, account_id: str) -> Dict[str, Any]:
+        account = self.repository.get_by_id(account_id)
+        if not account:
+            raise NotFound("Account not found")
+        return account
 
-    def update_item(self, item_id: str, update_data: ItemUpdate) -> dict:
-        self.get_item(item_id)  # Throws 404 if missing
+    def deposit_funds(self, account_id: str, data: TransactionRequest) -> Dict[str, Any]:
+        # Check if account exists first
+        self.get_account(account_id)
 
-        data_to_update = {k: v for k, v in update_data.model_dump().items() if v is not None}
-        if not data_to_update:
-            raise BadRequest("No fields to update")
+        updated_account = self.repository.add_transaction(account_id, "deposit", data.amount)
+        if not updated_account:
+            raise NotFound("Account not found during deposit update")
+        return updated_account
 
-        return self.repository.update(item_id, data_to_update)
+    def withdraw_funds(self, account_id: str, data: TransactionRequest) -> Dict[str, Any]:
+        # 1. Verify account exists
+        account = self.get_account(account_id)
 
-    def remove_item(self, item_id: str) -> None:
-        self.get_item(item_id)  # Throws 404 if missing
-        self.repository.delete(item_id)
+        # 2. Check balance before allowing withdrawal
+        if account["balance"] < data.amount:
+            raise BadRequest("Insufficient funds")
 
-    def list_items(self) -> List[dict]:
-        return self.repository.get_all()
+        updated_account = self.repository.add_transaction(account_id, "withdrawal", data.amount)
+        if not updated_account:
+            raise NotFound("Account not found during withdrawal update")
+        return updated_account
+
+    def get_history(self, account_id: str) -> List[Dict[str, Any]]:
+        account = self.get_account(account_id)
+        return account.get("transactions", [])

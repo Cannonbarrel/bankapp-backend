@@ -1,24 +1,25 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 from bson import ObjectId
 
-class ItemCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-    Swaglevel: float
+class AccountCreate(BaseModel):
+    userName: str
+    initial_balance: float = Field(default=0.0, ge=0.0) # ge=0.0 forces positive numbers
 
-class ItemUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    Swaglevel: Optional[float] = None
+class TransactionRequest(BaseModel):
+    amount: float = Field(gt=0.0) # gt=0.0 forces deposits/withdrawals to be greater than 0
 
-class ItemResponse(BaseModel):
+class TransactionResponse(BaseModel):
+    type: str # "deposit" or "withdrawal"
+    amount: float
+    timestamp: str
+
+class AccountResponse(BaseModel):
     id: str = Field(alias="_id")
-    name: str
-    description: Optional[str] = None
-    Swaglevel: float
+    userName: str
+    balance: float
+    transactions: List[TransactionResponse] = []
 
     class Config:
         populate_by_name = True
-        json_encoders = {ObjectId: str}
         json_encoders = {ObjectId: str}

@@ -15,5 +15,6 @@ mongo = PyMongo()
 
 def init_db(app):
     # 3. We inject the safely encoded strings directly into the URI string
-    app.config["MONGO_URI"] = f"mongodb+srv://{safe_username}:{safe_password}@cluster0.roeba7n.mongodb.net/my_rest_api_db?retryWrites=true&w=majority"
+    app.config[
+        "MONGO_URI"] = f"mongodb+srv://{safe_username}:{safe_password}@cluster0.roeba7n.mongodb.net/my_rest_api_db?retryWrites=true&w=majority"
     mongo.init_app(app)
