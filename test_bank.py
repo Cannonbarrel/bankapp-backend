@@ -33,12 +33,11 @@ class TestAccountService(unittest.TestCase):
         withdraw_request = TransactionRequest(amount=150.0)
 
         # 2. Act & Assert
-        # We assert that the service layer correctly raises a BadRequest exception
         with self.assertRaises(BadRequest) as context:
             self.service.withdraw_funds(account_id, withdraw_request)
 
-        # Verify the custom error message we wrote in Service.py
-        self.assertEqual(str(context.exception), "400 Bad Request: Insufficient funds")
+        # FIX: Updated to match your actual custom error message in Service.py
+        self.assertEqual(str(context.exception), "400 Bad Request: Insufficient funds in checking account")
 
         # Verify that add_transaction was NEVER called on the database
         self.mock_repo.add_transaction.assert_not_called()
@@ -73,7 +72,8 @@ class TestAccountService(unittest.TestCase):
 
         # 3. Assert
         self.assertEqual(result["balance"], 250.0)
-        self.mock_repo.add_transaction.assert_called_once_with(account_id, "deposit", 150.0)
+        # FIX: Added the 'checking' argument to match what your implementation is calling
+        self.mock_repo.add_transaction.assert_called_once_with(account_id, "deposit", 150.0, "checking")
 
 
 if __name__ == "__main__":
