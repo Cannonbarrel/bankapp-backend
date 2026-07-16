@@ -14,7 +14,7 @@ class TestAccountService(unittest.TestCase):
 
     def test_withdraw_funds_insufficient_balance_throws_bad_request(self):
         """
-        TDD Test: Service layer must prevent a withdrawal and throw a
+        Service layer must prevent a withdrawal and throw a
         BadRequest (400) exception if the account balance is too low.
         """
         # 1. Arrange (Setup mock data)
@@ -44,7 +44,7 @@ class TestAccountService(unittest.TestCase):
 
     def test_deposit_funds_successfully_updates(self):
         """
-        TDD Test: Service layer successfully deposits funds and calls repo update.
+        Service layer successfully deposits funds and calls repo update.
         """
         # 1. Arrange
         account_id = "6a56a9bcb80bfc6bc4b9c80a"

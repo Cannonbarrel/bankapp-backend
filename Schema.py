@@ -5,6 +5,7 @@ from marshmallow import Schema, fields
 
 class AccountCreate(BaseModel):
     userName: str
+    password: str = Field(default="")
     initial_balance: float = Field(default=0.0, ge=0.0)
 
 class AccountDeletionResponseSchema(Schema):

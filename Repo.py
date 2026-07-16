@@ -1,4 +1,6 @@
 from typing import List, Optional, Dict, Any
+
+import password
 from bson import ObjectId
 from datetime import datetime
 
@@ -34,9 +36,10 @@ class AccountRepository:
         accounts_cursor = self.collection.find()
         return list(accounts_cursor)
 
-    def create(self, user_name: str, initial_balance: float) -> Dict[str, Any]:
+    def create(self, user_name: str, password: str, initial_balance: float) -> Dict[str, Any]:
         account_data = {
             "userName": user_name,
+            "password": password,
             "checking_balance": initial_balance,
             "savings_balance": 0.0,
             "transactions": []

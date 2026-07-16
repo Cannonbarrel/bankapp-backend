@@ -1,15 +1,60 @@
+import os
+
 from flask import Flask, jsonify, request
 from pydantic import ValidationError
 from Database import init_db, mongo
 from Repo import AccountRepository
 from Service import AccountService
 from Schema import AccountCreate, TransactionRequest, AccountResponse
-
+from flask_cors import CORS
+import jwt
+from functools import wraps
+from datetime import datetime, timedelta, timezone
 app = Flask(__name__)
+CORS(app)
 init_db(app)
 
 account_repository = AccountRepository(mongo)
 account_service = AccountService(account_repository)
+
+JWT_SECRET = os.urandom(32).hex()
+
+def admin_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+
+        # 1. Look for 'Authorization: Bearer <token>' in headers
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            if auth_header.startswith("Bearer "):
+                token = auth_header.split(" ")[1]
+
+        # 2. If token is missing, reject immediately
+        if not token:
+            return jsonify({"error": "Access Forbidden", "reason": "Missing token"}), 403
+
+        try:
+            # 3. Decode and verify the token
+            payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+
+            # 4. Check for Authorization (ROLE_ADMIN only)
+            role = payload.get("role")
+            if role != "ROLE_ADMIN":
+                return jsonify({
+                    "error": "Access Forbidden",
+                    "reason": "Insufficient permissions (Admin role required)"
+                }), 403
+
+        except jwt.ExpiredSignatureError as e:
+            return jsonify({"error": "Access Forbidden", "reason": f"Token has expired: {str(e)}"}), 403
+        except jwt.InvalidTokenError as e:
+            return jsonify({"error": "Access Forbidden", "reason": f"Invalid token: {str(e)}"}), 403
+
+        # If everything passes, let them access the endpoint
+        return f(*args, **kwargs)
+
+    return decorated
 
 # 1. Create an Account
 @app.route('/accounts', methods=['POST'])
@@ -93,5 +138,28 @@ def get_transaction_history(account_id):
 def index():
     return jsonify({"status": "active", "message": "Banking API is running!"}), 200
 
+@app.route('/generate-token', methods=['POST'])
+def generate_token():
+    data = request.json or {}
+    username = data.get("username", "Guest")
+    password = data.get("password")  # Grab the password from the frontend request
+    role = data.get("role", "ROLE_USER")  # Default to regular user
+
+    # SECURITY CHECK: If someone requests ADMIN, they MUST provide the correct password
+    if role == "ROLE_ADMIN":
+        # Let's enforce a hardcoded admin credential check for your demo
+        if username != "admin" or password != "admin123":
+            return jsonify({"error": "Unauthorized: Invalid admin credentials."}), 401
+
+    # If they pass the check (or are just a standard ROLE_USER), generate the token
+    payload = {
+        "sub": "1234567890",
+        "username": username,
+        "role": role,
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
+    }
+
+    token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
+    return jsonify({"token": token}), 200
 if __name__ == "__main__":
     app.run(debug=True)

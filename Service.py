@@ -14,7 +14,7 @@ class AccountService:
         return self.repository.delete_account(account_id)
 
     def create_account(self, data: AccountCreate) -> Dict[str, Any]:
-        return self.repository.create(data.userName, data.initial_balance)
+        return self.repository.create(data.userName, data.password, data.initial_balance)
 
     def get_account(self, account_id: str) -> Dict[str, Any]:
         account = self.repository.get_by_id(account_id)
