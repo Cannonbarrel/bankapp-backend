@@ -161,5 +161,15 @@ def generate_token():
 
     token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
     return jsonify({"token": token}), 200
+
+@app.route('/admin', methods=['GET'])
+@admin_required
+def admin_dashboard():
+    return jsonify({
+        "status": "success",
+        "message": "Welcome to the Admin Secure Panel!",
+        "system_time": datetime.now(timezone.utc).isoformat()
+    }), 200
+
 if __name__ == "__main__":
     app.run(debug=True)
