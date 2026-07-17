@@ -2,9 +2,7 @@ import os
 import urllib.parse
 from flask_pymongo import PyMongo
 
-# 1. Put your raw, unencoded password and username here
-DB_USERNAME = "firenoob1001_db_user"
-DB_PASSWORD = "Cannball1@1!"
+
 
 # 2. This safely encodes any special characters (like @ or !) into URL-safe formats
 safe_username = urllib.parse.quote_plus(DB_USERNAME)
