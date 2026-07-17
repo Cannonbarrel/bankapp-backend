@@ -1,0 +1,7 @@
+Flask
+Flask-PyMongo
+flask-cors
+pydantic
+PyJWT
+pymongo
+gunicorn
