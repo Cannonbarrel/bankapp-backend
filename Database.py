@@ -13,9 +13,15 @@ db_pass = os.getenv("DB_PASS")
 # Initialize the Flask-PyMongo extension instance
 mongo = PyMongo()
 
-def init_db(app):
-    # We inject the safely encoded strings directly into the URI string
-    app.config[
 
+def init_db(app):
+    app.config[
         "MONGO_URI"] = f"mongodb+srv://{db_user}:{db_pass}@cluster0.roeba7n.mongodb.net/my_rest_api_db?retryWrites=true&w=majority"
     mongo.init_app(app)
+
+    # Force a check
+    try:
+        mongo.db.command('ping')
+        print("Successfully connected to MongoDB!")
+    except Exception as e:
+        print(f"Failed to connect: {e}")
