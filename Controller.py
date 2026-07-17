@@ -11,7 +11,7 @@ import jwt
 from functools import wraps
 from datetime import datetime, timedelta, timezone
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["https://bankapp-frontend-production.up.railway.app"])
 init_db(app)
 
 account_repository = AccountRepository(mongo)
