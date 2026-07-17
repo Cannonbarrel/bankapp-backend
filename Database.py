@@ -1,20 +1,20 @@
 import os
 import urllib.parse
+
+from flask.cli import load_dotenv
 from flask_pymongo import PyMongo
 
-# 1. Put your raw, unencoded password and username here
-DB_USERNAME = "firenoob1001_db_user"
-DB_PASSWORD = "Cannball1@1!"
+# This loads the variables from your .env file
+load_dotenv()
 
-# 2. This safely encodes any special characters (like @ or !) into URL-safe formats
-safe_username = urllib.parse.quote_plus(DB_USERNAME)
-safe_password = urllib.parse.quote_plus(DB_PASSWORD)
-
+# Now you can access them like this:
+db_user = os.getenv("DB_USER")
+db_pass = os.getenv("DB_PASS")
 # Initialize the Flask-PyMongo extension instance
 mongo = PyMongo()
 
 def init_db(app):
     # 3. We inject the safely encoded strings directly into the URI string
     app.config[
-        "MONGO_URI"] = f"mongodb+srv://{safe_username}:{safe_password}@cluster0.roeba7n.mongodb.net/my_rest_api_db?retryWrites=true&w=majority"
+        "MONGO_URI"] = f"mongodb+srv://{db_user}:{db_pass}@cluster0.roeba7n.mongodb.net/my_rest_api_db?retryWrites=true&w=majority"
     mongo.init_app(app)
